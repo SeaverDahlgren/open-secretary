@@ -1,5 +1,12 @@
 # Daily Summary Setup
 
+## Requirements
+
+- Python 3.11+
+- Telegram bot token + chat id
+- Gemini API key
+- iCal/ICS feed URL(s)
+
 ## Install
 
 ```bash
@@ -10,12 +17,22 @@ pip install -r requirements-dev.txt
 
 ## Configure
 
-1. Edit `config.json`.
-2. Set calendar iCal URL(s).
-3. Set Gemini API key (`llm.api_key` or `GEMINI_API_KEY`).
-4. Set Telegram bot credentials (`messenger.telegram_bot_token`, `messenger.telegram_chat_id`).
-5. Choose `schedule.time` (`HH:MM`) and `schedule.days` (`mon..sun`).
-6. Optional: install the macOS launchd service via `python cli.py install-service`.
+Option A: interactive CLI
+
+```bash
+python cli.py setup
+```
+
+Option B: edit `config.json`
+
+- `calendar.ical_urls` list
+- `llm.model`
+- `llm.api_key` or `GEMINI_API_KEY`
+- `messenger.telegram_bot_token`
+- `messenger.telegram_chat_id`
+- `schedule.time` (`HH:MM`)
+- `schedule.days` (`mon..sun`)
+- `schedule.timezone` (`America/Los_Angeles`, `UTC`, etc)
 
 Finding iCal URLs
 
@@ -30,8 +47,29 @@ Finding iCal URLs
 python -m src.main
 ```
 
+Run once
+
+```bash
+python cli.py run-now
+```
+
+## macOS Service
+
+```bash
+python cli.py install-service
+python cli.py status
+python cli.py uninstall-service
+```
+
 ## Test
 
 ```bash
 pytest
 ```
+
+## Troubleshooting
+
+- `calendar.ical_urls is required`: missing calendar feed URL(s)
+- `llm.api_key or GEMINI_API_KEY is required`: missing Gemini credentials
+- `messenger.telegram_bot_token is required`: missing bot token
+- `messenger.telegram_chat_id is required`: run `python cli.py setup` to fetch chat id

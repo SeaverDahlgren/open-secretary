@@ -12,6 +12,12 @@ Sends the generated summary to Telegram via the Bot API.
 - Errors on non-JSON responses, HTTP >= 400, or Telegram `ok=false`.
 - Returns the Telegram `message_id` as a string.
 
+Behavior notes
+
+- Request timeout 15s
+- No retries or message splitting
+- Telegram API errors surface as `RuntimeError`
+
 Config
 
 - `messenger.telegram_bot_token`
