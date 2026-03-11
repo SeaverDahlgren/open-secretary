@@ -46,5 +46,9 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("install-service", help="Install launchd service (macOS)")
     subparsers.add_parser("uninstall-service", help="Uninstall launchd service (macOS)")
     subparsers.add_parser("status", help="Show launchd service status (macOS)")
+    subparsers.add_parser("install-gateway", help="Install gateway service (macOS)")
+    subparsers.add_parser("uninstall-gateway", help="Uninstall gateway service (macOS)")
+    subparsers.add_parser("gateway-status", help="Show gateway service status (macOS)")
+    subparsers.add_parser("gateway-run", help="Run the gateway in the foreground")
 
     return parser

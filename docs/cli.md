@@ -12,6 +12,8 @@ Interactive and command-line config management for `config.json`.
 - `set-schedule`, `set-calendar`, `set-llm`, `set-messenger` update one area at a time.
 - `run-now` triggers the pipeline immediately and sends the summary to Telegram.
 - `install-service`, `uninstall-service`, `status` manage the macOS launchd service.
+- `install-gateway`, `uninstall-gateway`, `gateway-status` manage the gateway service.
+- `gateway-run` runs the gateway in the foreground.
 - `show` prints config with secrets redacted.
 
 Timezone options
@@ -41,6 +43,10 @@ python cli.py run-now
 python cli.py install-service
 python cli.py status
 python cli.py uninstall-service
+python cli.py install-gateway
+python cli.py gateway-status
+python cli.py uninstall-gateway
+python cli.py gateway-run
 python cli.py show
 ```
 

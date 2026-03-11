@@ -4,11 +4,19 @@ from pathlib import Path
 
 from src.cli.config_ops import set_calendar, set_llm, set_messenger, set_schedule, show_config
 from src.cli.constants import TIMEZONE_OPTIONS
-from src.cli.launchd import install_service, service_status, uninstall_service
+from src.cli.launchd import (
+    gateway_status,
+    install_gateway,
+    install_service,
+    service_status,
+    uninstall_gateway,
+    uninstall_service,
+)
 from src.cli.parser import build_parser
 from src.cli.prompts import prompt_optional
 from src.cli.setup_flow import setup_config
 from src.config import load_config
+from src.gateway.service import TelegramGateway
 from src.pipeline import DailySummaryPipeline
 
 
@@ -58,6 +66,16 @@ def main() -> None:
         uninstall_service()
     elif args.command == "status":
         service_status()
+    elif args.command == "install-gateway":
+        install_gateway(config_path)
+    elif args.command == "uninstall-gateway":
+        uninstall_gateway()
+    elif args.command == "gateway-status":
+        gateway_status()
+    elif args.command == "gateway-run":
+        config = load_config(str(config_path))
+        gateway = TelegramGateway(config)
+        gateway.run()
     else:
         parser.error("Unknown command")
 

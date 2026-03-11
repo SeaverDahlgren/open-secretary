@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 WEEKDAYS = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"}
@@ -33,11 +33,29 @@ class MessengerConfig:
 
 
 @dataclass(slots=True)
+class AgentConfig:
+    enabled: bool = True
+    memory_path: str = "agent_memory.md"
+    memory_max_turns: int = 10
+    system_prompt: str = (
+        "You are a helpful assistant that chats with a human user over Telegram. "
+        "Your primary job is to help with scheduling, timing, and planning questions, "
+        "but the user may ask about other topics. Be clear, direct, and practical. "
+        "Ask clarifying questions when needed. Keep responses concise."
+    )
+    max_reply_words: int = 100
+    poll_interval_s: int = 10
+    poll_timeout_s: int = 5
+    synopsis_every_n_turns: int = 10
+
+
+@dataclass(slots=True)
 class AppConfig:
     schedule: ScheduleConfig
     calendar: CalendarConfig
     llm: LLMConfig
     messenger: MessengerConfig
+    agent: AgentConfig = field(default_factory=AgentConfig)
 
 
 def _validate_time(value: str) -> str:
@@ -70,6 +88,7 @@ def load_config(path: str = "config.json") -> AppConfig:
     calendar = raw.get("calendar", {})
     llm = raw.get("llm", {})
     messenger = raw.get("messenger", {})
+    agent = raw.get("agent", {})
 
     llm_api_key = llm.get("api_key") or os.getenv("GEMINI_API_KEY", "")
 
@@ -97,6 +116,21 @@ def load_config(path: str = "config.json") -> AppConfig:
         messenger=MessengerConfig(
             telegram_bot_token=messenger.get("telegram_bot_token", ""),
             telegram_chat_id=str(messenger.get("telegram_chat_id", "")),
+        ),
+        agent=AgentConfig(
+            enabled=bool(agent.get("enabled", True)),
+            memory_path=str(agent.get("memory_path", "agent_memory.md")),
+            memory_max_turns=int(agent.get("memory_max_turns", 10)),
+            system_prompt=str(
+                agent.get(
+                    "system_prompt",
+                    AgentConfig().system_prompt,
+                )
+            ),
+            max_reply_words=int(agent.get("max_reply_words", 100)),
+            poll_interval_s=int(agent.get("poll_interval_s", 10)),
+            poll_timeout_s=int(agent.get("poll_timeout_s", 5)),
+            synopsis_every_n_turns=int(agent.get("synopsis_every_n_turns", 10)),
         ),
     )
 

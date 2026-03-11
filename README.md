@@ -29,11 +29,13 @@ python cli.py install-service
 - `calendar.ical_urls`
 - `llm.model`, `llm.api_key` or `GEMINI_API_KEY`
 - `messenger.telegram_bot_token`, `messenger.telegram_chat_id`
+- `agent.*` (see `docs/gateway.md`)
 
 **Architecture**
 
 - `src/calendar`: fetches iCal data and maps it to `CalendarEvent` items.
 - `src/cli`: manages config.json interactively or via commands.
+- `src/gateway`: polls Telegram and runs the agent chat loop.
 - `src/llm`: builds prompts and calls Gemini to generate the summary.
 - `src/messenger`: sends the summary to Telegram.
 - `src/scheduler`: schedules the daily job with APScheduler.
@@ -43,6 +45,7 @@ python cli.py install-service
 
 - `docs/daily-summary-setup.md`: end-to-end setup
 - `docs/calendar.md`: iCal parsing behavior
+- `docs/gateway.md`: Telegram polling gateway
 - `docs/llm.md`: prompt + Gemini usage
 - `docs/messenger.md`: Telegram delivery details
 - `docs/scheduler.md`: scheduling details
