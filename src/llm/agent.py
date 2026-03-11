@@ -12,8 +12,8 @@ class AgentResponder:
         self.max_reply_words = max_reply_words
         self.client = genai.Client(api_key=api_key)
 
-    def respond(self, user_text: str, memory: MemoryState) -> str:
-        prompt = self._build_chat_prompt(user_text, memory)
+    def respond(self, user_text: str, memory: MemoryState, calendar_context: str | None = None) -> str:
+        prompt = self._build_chat_prompt(user_text, memory, calendar_context)
         response = self.client.models.generate_content(model=self.model, contents=prompt)
         text = (response.text or "").strip()
         return _truncate_words(text or "No response generated.", self.max_reply_words)
@@ -24,15 +24,22 @@ class AgentResponder:
         text = (response.text or "").strip()
         return text or memory.synopsis
 
-    def _build_chat_prompt(self, user_text: str, memory: MemoryState) -> str:
+    def _build_chat_prompt(
+        self,
+        user_text: str,
+        memory: MemoryState,
+        calendar_context: str | None,
+    ) -> str:
         lines = [
             self.system_prompt,
             "",
             "Context synopsis:",
             memory.synopsis.strip() or "(none)",
             "",
-            "Recent conversation:",
         ]
+        if calendar_context:
+            lines.extend(["Calendar context:", calendar_context, ""])
+        lines.append("Recent conversation:")
         for item in memory.turns:
             role = item.get("role", "user")
             content = item.get("content", "")

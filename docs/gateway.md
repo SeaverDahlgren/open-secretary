@@ -23,6 +23,8 @@ Config (`agent`)
 - `poll_interval_s`
 - `poll_timeout_s`
 - `synopsis_every_n_turns`
+- `calendar_max_days`
+- `calendar_cache_ttl_s`
 
 Run
 

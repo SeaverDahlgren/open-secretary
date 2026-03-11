@@ -47,6 +47,8 @@ class AgentConfig:
     poll_interval_s: int = 10
     poll_timeout_s: int = 5
     synopsis_every_n_turns: int = 10
+    calendar_max_days: int = 30
+    calendar_cache_ttl_s: int = 600
 
 
 @dataclass(slots=True)
@@ -131,6 +133,8 @@ def load_config(path: str = "config.json") -> AppConfig:
             poll_interval_s=int(agent.get("poll_interval_s", 10)),
             poll_timeout_s=int(agent.get("poll_timeout_s", 5)),
             synopsis_every_n_turns=int(agent.get("synopsis_every_n_turns", 10)),
+            calendar_max_days=int(agent.get("calendar_max_days", 30)),
+            calendar_cache_ttl_s=int(agent.get("calendar_cache_ttl_s", 600)),
         ),
     )
 

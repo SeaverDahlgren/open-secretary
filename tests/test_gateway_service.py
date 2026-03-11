@@ -13,7 +13,7 @@ class DummyResponder:
     def __init__(self) -> None:
         self.responses: list[str] = []
 
-    def respond(self, user_text: str, memory: MemoryState) -> str:
+    def respond(self, user_text: str, memory: MemoryState, calendar_context: str | None = None) -> str:
         self.responses.append(user_text)
         return f"Echo: {user_text}"
 

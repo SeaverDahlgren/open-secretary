@@ -8,6 +8,7 @@ from typing import Any
 import requests
 
 from src.config import AgentConfig, AppConfig
+from src.gateway.calendar_tool import CalendarTool
 from src.gateway.memory import MemoryState, append_turn, load_memory, save_memory, trim_turns, turn_count
 from src.llm.agent import AgentResponder
 from src.messenger import TelegramMessenger
@@ -30,6 +31,12 @@ class TelegramGateway:
         self.messenger = TelegramMessenger(
             bot_token=config.messenger.telegram_bot_token,
             chat_id=config.messenger.telegram_chat_id,
+        )
+        self.calendar_tool = CalendarTool(
+            ical_urls=config.calendar.ical_urls,
+            timezone=config.schedule.timezone,
+            max_days=config.agent.calendar_max_days,
+            cache_ttl_s=config.agent.calendar_cache_ttl_s,
         )
         self.memory_path = Path(config.agent.memory_path)
         self.memory = load_memory(self.memory_path)
@@ -107,9 +114,11 @@ class TelegramGateway:
         return result if isinstance(result, list) else []
 
     def _handle_message(self, text: str) -> None:
+        calendar_context = self.calendar_tool.get_context(text)
         response_text = self.agent.respond(
             user_text=text,
             memory=self.memory,
+            calendar_context=calendar_context,
         )
         self.messenger.send(response_text)
         append_turn(self.memory, text, response_text)
