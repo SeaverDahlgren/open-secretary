@@ -12,7 +12,7 @@ from src.cli.constants import (
     DEFAULT_TIMEZONE,
     TIMEZONE_OPTIONS,
 )
-from src.cli.launchd import install_service
+from src.cli.launchd import install_gateway, install_service
 from src.cli.prompts import prompt_optional, prompt_required
 from src.cli.telegram_setup import prompt_chat_id
 from src.config import _validate_days, _validate_time
@@ -51,9 +51,15 @@ def _maybe_install_launchd(config_path: Path) -> None:
         print("Launchd install canceled.")
         return
     install_service(config_path)
+    install_gateway(config_path)
 
 
-def setup_config(path: Path, force: bool) -> None:
+def _install_both_services(config_path: Path) -> None:
+    install_service(config_path)
+    install_gateway(config_path)
+
+
+def setup_config(path: Path, force: bool, install_mode: str = "prompt") -> None:
     if path.exists() and not force:
         print(f"Config file already exists: {path}", file=sys.stderr)
         print("Use --force to overwrite.", file=sys.stderr)
@@ -101,4 +107,7 @@ def setup_config(path: Path, force: bool) -> None:
 
     _save_config(path, config)
     print(f"Wrote config to {path}")
-    _maybe_install_launchd(path)
+    if install_mode == "prompt":
+        _maybe_install_launchd(path)
+    elif install_mode == "both":
+        _install_both_services(path)

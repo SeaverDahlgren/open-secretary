@@ -8,12 +8,20 @@ read_when:
 
 Interactive and command-line config management for `config.json`.
 
+Default entry point
+
+- Running `python cli.py` with no subcommand opens the interactive menu.
+- `manage` is an alias for the interactive menu.
 - `setup` walks through first-time credentials and schedule.
+- `start` runs setup and installs both services.
 - `set-schedule`, `set-calendar`, `set-llm`, `set-messenger` update one area at a time.
 - `run-now` triggers the pipeline immediately and sends the summary to Telegram.
 - `install-service`, `uninstall-service`, `status` manage the macOS launchd service.
 - `install-gateway`, `uninstall-gateway`, `gateway-status` manage the gateway service.
 - `gateway-run` runs the gateway in the foreground.
+- `menu` provides an interactive menu to manage calendars and services.
+- `stop-bot` disables the bot and stops the gateway service.
+- `uninstall-all` uninstalls both services.
 - `show` prints config with secrets redacted.
 
 Timezone options
@@ -34,7 +42,10 @@ Timezone options
 Usage
 
 ```bash
+python cli.py
+python cli.py manage
 python cli.py setup
+python cli.py start
 python cli.py set-schedule --time 08:00 --days mon,wed,fri --timezone-index 1
 python cli.py set-calendar --ical-url https://example.com/cal.ics --ical-url https://example.com/other.ics
 python cli.py set-calendar --ical-urls https://example.com/cal.ics,https://example.com/other.ics
@@ -47,6 +58,9 @@ python cli.py install-gateway
 python cli.py gateway-status
 python cli.py uninstall-gateway
 python cli.py gateway-run
+python cli.py menu
+python cli.py stop-bot
+python cli.py uninstall-all
 python cli.py show
 ```
 

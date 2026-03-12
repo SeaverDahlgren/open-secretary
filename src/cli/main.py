@@ -12,6 +12,7 @@ from src.cli.launchd import (
     uninstall_gateway,
     uninstall_service,
 )
+from src.cli.menu import run_menu
 from src.cli.parser import build_parser
 from src.cli.prompts import prompt_optional
 from src.cli.setup_flow import setup_config
@@ -25,8 +26,13 @@ def main() -> None:
     args = parser.parse_args()
     config_path = Path(args.config)
 
+    if not args.command:
+        run_menu(config_path)
+        return
     if args.command == "setup":
         setup_config(config_path, force=args.force)
+    elif args.command == "start":
+        setup_config(config_path, force=args.force, install_mode="both")
     elif args.command == "set-schedule":
         timezone = args.timezone
         if args.timezone_index is not None:
@@ -76,6 +82,24 @@ def main() -> None:
         config = load_config(str(config_path))
         gateway = TelegramGateway(config)
         gateway.run()
+    elif args.command in {"menu", "manage"}:
+        run_menu(config_path)
+    elif args.command == "stop-bot":
+        from src.cli.launchd import stop_gateway
+        from src.cli.config_ops import load_config_file, save_config_file
+
+        data = load_config_file(config_path)
+        agent = data.get("agent")
+        if not isinstance(agent, dict):
+            agent = {}
+            data["agent"] = agent
+        agent["enabled"] = False
+        save_config_file(config_path, data)
+        stop_gateway()
+        print("Bot disabled. Re-enable by setting agent.enabled to true.")
+    elif args.command == "uninstall-all":
+        uninstall_service()
+        uninstall_gateway()
     else:
         parser.error("Unknown command")
 

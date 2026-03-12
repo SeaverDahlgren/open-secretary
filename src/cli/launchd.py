@@ -39,7 +39,12 @@ def _write_launchd_plist(
 def _bootstrap_launchd(plist_path: Path, label: str) -> None:
     uid = os.getuid()
     target = f"gui/{uid}"
-    subprocess.run(["launchctl", "bootout", target, str(plist_path)], check=False)
+    subprocess.run(
+        ["launchctl", "bootout", target, str(plist_path)],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
     subprocess.run(["launchctl", "bootstrap", target, str(plist_path)], check=True)
     subprocess.run(["launchctl", "kickstart", "-k", f"{target}/{label}"], check=False)
 
@@ -160,3 +165,13 @@ def gateway_status() -> None:
         state = "loaded"
     print(f"Gateway: {state}")
     print(f"Plist: {plist_path}")
+
+
+def stop_gateway() -> None:
+    if sys.platform != "darwin":
+        raise SystemExit("stop-bot is only supported on macOS.")
+    label = "com.opensecretary.gateway"
+    plist_path = _service_plist_path(label)
+    uid = os.getuid()
+    target = f"gui/{uid}"
+    subprocess.run(["launchctl", "bootout", target, str(plist_path)], check=False)

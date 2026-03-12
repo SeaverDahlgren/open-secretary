@@ -6,10 +6,12 @@ import argparse
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="openSecretary config CLI")
     parser.add_argument("--config", default="config.json", help="Path to config.json")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command")
 
     setup_parser = subparsers.add_parser("setup", help="First-time interactive setup")
     setup_parser.add_argument("--force", action="store_true", help="Overwrite existing config")
+    start_parser = subparsers.add_parser("start", help="Interactive setup + install both services")
+    start_parser.add_argument("--force", action="store_true", help="Overwrite existing config")
 
     schedule_parser = subparsers.add_parser("set-schedule", help="Update schedule settings")
     schedule_parser.add_argument("--time", help="Time in HH:MM")
@@ -50,5 +52,9 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("uninstall-gateway", help="Uninstall gateway service (macOS)")
     subparsers.add_parser("gateway-status", help="Show gateway service status (macOS)")
     subparsers.add_parser("gateway-run", help="Run the gateway in the foreground")
+    subparsers.add_parser("menu", help="Interactive menu for managing calendars and services")
+    subparsers.add_parser("manage", help="Alias for the interactive menu")
+    subparsers.add_parser("stop-bot", help="Disable the bot and stop the gateway service")
+    subparsers.add_parser("uninstall-all", help="Uninstall both services (macOS)")
 
     return parser

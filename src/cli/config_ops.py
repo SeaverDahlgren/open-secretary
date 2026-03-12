@@ -109,3 +109,11 @@ def show_config(path: Path) -> None:
     data = _load_config(path)
     redacted = redact_config(data)
     print(json.dumps(redacted, indent=2, sort_keys=True))
+
+
+def load_config_file(path: Path) -> dict[str, Any]:
+    return _load_config(path)
+
+
+def save_config_file(path: Path, data: dict[str, Any]) -> None:
+    _save_config(path, data)
