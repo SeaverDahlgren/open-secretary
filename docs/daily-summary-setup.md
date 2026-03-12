@@ -17,10 +17,10 @@ pip install -r requirements-dev.txt
 
 ## Configure
 
-Option A: interactive CLI
+Option A: interactive CLI (menu)
 
 ```bash
-python cli.py setup
+python cli.py
 ```
 
 Option B: edit `config.json`

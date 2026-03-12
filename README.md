@@ -8,19 +8,23 @@ Daily calendar summary to Telegram using APScheduler + iCal + Gemini.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
-python cli.py setup
-python -m src.main
+python cli.py
 ```
 
 **CLI**
 
 ```bash
+python cli.py
+python cli.py manage
 python cli.py setup
 python cli.py set-schedule --time 08:00 --days mon,wed,fri --timezone-index 1
 python cli.py set-calendar --ical-urls https://example.com/a.ics,https://example.com/b.ics
 python cli.py set-llm --model gemini-2.5-flash --prompt-api-key
 python cli.py run-now
 python cli.py install-service
+python cli.py install-gateway
+python cli.py stop-bot
+python cli.py uninstall-all
 ```
 
 **Config Keys**
