@@ -21,6 +21,7 @@ htmlcov/
 config.local.json
 *.local.json
 config.json
+agent_memory.md
 
 dist/
 build/
