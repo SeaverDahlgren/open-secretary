@@ -174,4 +174,40 @@ def stop_gateway() -> None:
     plist_path = _service_plist_path(label)
     uid = os.getuid()
     target = f"gui/{uid}"
-    subprocess.run(["launchctl", "bootout", target, str(plist_path)], check=False)
+    subprocess.run(
+        ["launchctl", "bootout", target, str(plist_path)],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def stop_service() -> None:
+    if sys.platform != "darwin":
+        raise SystemExit("stop-reminders is only supported on macOS.")
+    label = "com.opensecretary"
+    plist_path = _service_plist_path(label)
+    uid = os.getuid()
+    target = f"gui/{uid}"
+    subprocess.run(
+        ["launchctl", "bootout", target, str(plist_path)],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def service_state(label: str) -> str:
+    uid = os.getuid()
+    target = f"gui/{uid}/{label}"
+    result = subprocess.run(
+        ["launchctl", "print", target],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return "stopped"
+    if "state = running" in result.stdout:
+        return "running"
+    return "loaded"

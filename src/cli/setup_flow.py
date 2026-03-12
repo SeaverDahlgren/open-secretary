@@ -111,3 +111,5 @@ def setup_config(path: Path, force: bool, install_mode: str = "prompt") -> None:
         _maybe_install_launchd(path)
     elif install_mode == "both":
         _install_both_services(path)
+    elif install_mode == "none":
+        return

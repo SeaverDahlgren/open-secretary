@@ -64,6 +64,13 @@ python cli.py uninstall-all
 python cli.py show
 ```
 
+Menu options
+
+- Configure calendars (add/delete)
+- Configure bots (enable/disable reminders and gateway based on current status)
+- Uninstall openSecretary
+- Exit
+
 Finding calendar URLs
 
 - Use iCal/ICS URLs (not Google API URLs). The CLI only supports iCal feeds.
