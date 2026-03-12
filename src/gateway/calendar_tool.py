@@ -4,8 +4,10 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+import json
 from zoneinfo import ZoneInfo
 
+from google import genai
 from dateutil import parser as date_parser
 
 from src.calendar import CalendarService
@@ -43,11 +45,15 @@ class CalendarTool:
         self,
         ical_urls: list[str],
         timezone: str,
+        api_key: str,
+        model: str,
         max_days: int = 30,
         cache_ttl_s: int = 600,
     ) -> None:
         self.service = CalendarService(ical_urls=ical_urls, timezone=timezone)
         self.tz = ZoneInfo(timezone)
+        self.client = genai.Client(api_key=api_key)
+        self.model = model
         self.max_days = max_days
         self.cache_ttl_s = cache_ttl_s
         self._cache: dict[date, tuple[float, list[CalendarEvent]]] = {}
@@ -56,7 +62,7 @@ class CalendarTool:
         if not is_calendar_query(user_text):
             return None
         today = datetime.now(self.tz).date()
-        window = extract_date_window(user_text, today, self.max_days)
+        window = self._plan_window(user_text, today)
         events_by_day = self._fetch_window(window)
         return render_calendar_context(window, events_by_day)
 
@@ -79,6 +85,18 @@ class CalendarTool:
         for day in _iter_days(window.start, window.end):
             day_events = [event for event in events if _event_intersects_day(event, day, self.tz)]
             self._cache[day] = (now, day_events)
+
+    def _plan_window(self, user_text: str, today: date) -> CalendarWindow:
+        window = plan_window_with_llm(
+            client=self.client,
+            model=self.model,
+            user_text=user_text,
+            today=today,
+            max_days=self.max_days,
+        )
+        if window is None:
+            return extract_date_window(user_text, today, self.max_days)
+        return window
 
 
 def is_calendar_query(text: str) -> bool:
@@ -106,6 +124,32 @@ def is_calendar_query(text: str) -> bool:
     if any(keyword in lowered for keyword in keywords):
         return True
     return any(word in lowered for word in WEEKDAYS)
+
+
+def plan_window_with_llm(
+    client: genai.Client,
+    model: str,
+    user_text: str,
+    today: date,
+    max_days: int,
+) -> CalendarWindow | None:
+    prompt = "\n".join(
+        [
+            "You are a calendar assistant that selects a date range for fetching events.",
+            "Return a JSON object with keys start_date and end_date in YYYY-MM-DD.",
+            "If the request is ambiguous, choose the smallest reasonable range.",
+            f"Today: {today.isoformat()}",
+            f"Maximum range: {max_days} days",
+            "",
+            f"User request: {user_text}",
+            "",
+            "Return only JSON.",
+        ]
+    )
+    response = client.models.generate_content(model=model, contents=prompt)
+    text = (response.text or "").strip()
+    window = _parse_llm_window(text, today, max_days)
+    return window
 
 
 def extract_date_window(text: str, today: date, max_days: int) -> CalendarWindow:
@@ -203,6 +247,44 @@ def _extract_explicit_date(text: str) -> date | None:
             except (ValueError, OverflowError):
                 return None
     return None
+
+
+def _parse_llm_window(text: str, today: date, max_days: int) -> CalendarWindow | None:
+    try:
+        payload = json.loads(_extract_json(text))
+    except (json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    start_raw = payload.get("start_date")
+    end_raw = payload.get("end_date")
+    if not isinstance(start_raw, str) or not isinstance(end_raw, str):
+        return None
+    try:
+        start = date_parser.parse(start_raw).date()
+        end = date_parser.parse(end_raw).date()
+    except (ValueError, OverflowError):
+        return None
+    if end < start:
+        return None
+    if (end - start).days + 1 > max_days:
+        end = start + timedelta(days=max_days - 1)
+    if start < today:
+        start = today
+    if end < today:
+        return None
+    return CalendarWindow(start, end)
+
+
+def _extract_json(text: str) -> str:
+    text = text.strip()
+    if text.startswith("{") and text.endswith("}"):
+        return text
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("No JSON object found")
+    return text[start : end + 1]
 
 
 def _event_intersects_day(event: CalendarEvent, day: date, tz: ZoneInfo) -> bool:

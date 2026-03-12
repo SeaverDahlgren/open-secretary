@@ -35,6 +35,8 @@ class TelegramGateway:
         self.calendar_tool = CalendarTool(
             ical_urls=config.calendar.ical_urls,
             timezone=config.schedule.timezone,
+            api_key=config.llm.api_key,
+            model=config.llm.model,
             max_days=config.agent.calendar_max_days,
             cache_ttl_s=config.agent.calendar_cache_ttl_s,
         )

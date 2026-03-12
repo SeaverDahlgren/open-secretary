@@ -12,6 +12,7 @@ Polls Telegram for new messages and forwards them to the LLM agent.
 - Ignores messages older than startup by advancing offset.
 - Filters to the configured `telegram_chat_id`.
 - Stores memory in a local markdown file with synopsis + last turns.
+- Uses keyword detection + an LLM planning step to select which dates to fetch.
 
 Config (`agent`)
 
