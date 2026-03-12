@@ -6,21 +6,34 @@ from src.gateway.memory import MemoryState
 
 
 class AgentResponder:
-    def __init__(self, api_key: str, model: str, system_prompt: str, max_reply_words: int) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        system_prompt: str,
+        max_reply_words: int,
+        reply_temperature: float,
+    ) -> None:
         self.model = model
         self.system_prompt = system_prompt
         self.max_reply_words = max_reply_words
+        self.reply_temperature = reply_temperature
         self.client = genai.Client(api_key=api_key)
 
     def respond(self, user_text: str, memory: MemoryState, calendar_context: str | None = None) -> str:
         prompt = self._build_chat_prompt(user_text, memory, calendar_context)
-        response = self.client.models.generate_content(model=self.model, contents=prompt)
+        response = _generate_with_temperature(
+            self.client,
+            self.model,
+            prompt,
+            self.reply_temperature,
+        )
         text = (response.text or "").strip()
         return _truncate_words(text or "No response generated.", self.max_reply_words)
 
     def summarize_memory(self, memory: MemoryState) -> str:
         prompt = self._build_summary_prompt(memory)
-        response = self.client.models.generate_content(model=self.model, contents=prompt)
+        response = _generate_with_temperature(self.client, self.model, prompt, 0.2)
         text = (response.text or "").strip()
         return text or memory.synopsis
 
@@ -72,3 +85,19 @@ def _truncate_words(text: str, max_words: int) -> str:
     if len(words) <= max_words:
         return text
     return " ".join(words[:max_words]).rstrip() + "…"
+
+
+def _generate_with_temperature(
+    client: genai.Client,
+    model: str,
+    prompt: str,
+    temperature: float,
+):
+    try:
+        return client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config={"temperature": temperature},
+        )
+    except TypeError:
+        return client.models.generate_content(model=model, contents=prompt)

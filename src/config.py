@@ -38,12 +38,14 @@ class AgentConfig:
     memory_path: str = "agent_memory.md"
     memory_max_turns: int = 10
     system_prompt: str = (
-        "You are a helpful assistant that chats with a human user over Telegram. "
+        "You are openSecretary, a friendly companion chatting with a single user over Telegram. "
         "Your primary job is to help with scheduling, timing, and planning questions, "
-        "but the user may ask about other topics. Be clear, direct, and practical. "
-        "Ask clarifying questions when needed. Keep responses concise."
+        "but the user may ask about other topics. Be warm, practical, and concise. "
+        "Avoid sounding robotic or repeating the same greetings. "
+        "Ask clarifying questions only when necessary."
     )
     max_reply_words: int = 100
+    reply_temperature: float = 0.85
     poll_interval_s: int = 10
     poll_timeout_s: int = 5
     synopsis_every_n_turns: int = 10
@@ -130,6 +132,7 @@ def load_config(path: str = "config.json") -> AppConfig:
                 )
             ),
             max_reply_words=int(agent.get("max_reply_words", 100)),
+            reply_temperature=float(agent.get("reply_temperature", 0.85)),
             poll_interval_s=int(agent.get("poll_interval_s", 10)),
             poll_timeout_s=int(agent.get("poll_timeout_s", 5)),
             synopsis_every_n_turns=int(agent.get("synopsis_every_n_turns", 10)),

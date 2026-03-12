@@ -146,7 +146,7 @@ def plan_window_with_llm(
             "Return only JSON.",
         ]
     )
-    response = client.models.generate_content(model=model, contents=prompt)
+    response = _generate_with_temperature(client, model, prompt, 0.2)
     text = (response.text or "").strip()
     window = _parse_llm_window(text, today, max_days)
     return window
@@ -285,6 +285,22 @@ def _extract_json(text: str) -> str:
     if start == -1 or end == -1 or end <= start:
         raise ValueError("No JSON object found")
     return text[start : end + 1]
+
+
+def _generate_with_temperature(
+    client: genai.Client,
+    model: str,
+    prompt: str,
+    temperature: float,
+):
+    try:
+        return client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config={"temperature": temperature},
+        )
+    except TypeError:
+        return client.models.generate_content(model=model, contents=prompt)
 
 
 def _event_intersects_day(event: CalendarEvent, day: date, tz: ZoneInfo) -> bool:

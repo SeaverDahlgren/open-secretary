@@ -27,6 +27,7 @@ class TelegramGateway:
             model=config.llm.model,
             system_prompt=config.agent.system_prompt,
             max_reply_words=config.agent.max_reply_words,
+            reply_temperature=config.agent.reply_temperature,
         )
         self.messenger = TelegramMessenger(
             bot_token=config.messenger.telegram_bot_token,

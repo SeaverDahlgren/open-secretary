@@ -21,6 +21,7 @@ Config (`agent`)
 - `memory_max_turns`
 - `system_prompt`
 - `max_reply_words`
+- `reply_temperature`
 - `poll_interval_s`
 - `poll_timeout_s`
 - `synopsis_every_n_turns`
