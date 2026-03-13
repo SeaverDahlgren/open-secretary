@@ -68,6 +68,7 @@ Menu options
 
 - Configure calendars (add/delete)
 - Configure bots (enable/disable reminders and gateway based on current status)
+- Model configs (update model + API key)
 - Uninstall openSecretary
 - Exit
 

@@ -15,7 +15,7 @@ from src.cli.launchd import (
     uninstall_gateway,
     uninstall_service,
 )
-from src.cli.prompts import prompt_required
+from src.cli.prompts import prompt_optional, prompt_required
 from src.cli.setup_flow import setup_config
 
 
@@ -25,16 +25,19 @@ def run_menu(config_path: Path) -> None:
         print("openSecretary menu")
         print("1) Configure calendars")
         print("2) Configure bots")
-        print("3) Uninstall openSecretary")
-        print("4) Exit")
+        print("3) Model configs")
+        print("4) Uninstall openSecretary")
+        print("5) Exit")
         choice = prompt_required("Select option").strip()
         if choice == "1":
             _calendar_menu(config_path)
         elif choice == "2":
             _bots_menu(config_path)
         elif choice == "3":
-            _uninstall_services()
+            _model_menu(config_path)
         elif choice == "4":
+            _uninstall_services()
+        elif choice == "5":
             return
         else:
             print("Invalid option.")
@@ -168,6 +171,22 @@ def _bots_menu(config_path: Path) -> None:
 def _ensure_config_exists(config_path: Path) -> None:
     if not config_path.exists():
         setup_config(config_path, force=False, install_mode="none")
+
+
+def _model_menu(config_path: Path) -> None:
+    data = load_config_file(config_path)
+    llm = _ensure_section(data, "llm")
+    current_model = llm.get("model") or ""
+    print("")
+    print(f"Current model: {current_model or '(not set)'}")
+    new_model = prompt_optional("New model (leave blank to keep current)") or ""
+    if new_model.strip():
+        llm["model"] = new_model.strip()
+    new_key = prompt_optional("New API key (leave blank to keep current)", secret=True) or ""
+    if new_key.strip():
+        llm["api_key"] = new_key.strip()
+    save_config_file(config_path, data)
+    print("Model settings updated.")
 
 
 def _clear_bot_memory() -> None:
