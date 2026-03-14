@@ -72,6 +72,11 @@ Menu options
 - Uninstall openSecretary
 - Exit
 
+Styling
+
+- The menu uses Rich for light styling, screen clearing, and startup ASCII art.
+- Selection uses arrow keys or j/k; Enter selects, q cancels.
+
 Finding calendar URLs
 
 - Use iCal/ICS URLs (not Google API URLs). The CLI only supports iCal feeds.
